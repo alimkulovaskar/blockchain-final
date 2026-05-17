@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title PriceOracle — Chainlink price feed with staleness check
 contract PriceOracle is Ownable {
-
     struct FeedConfig {
         AggregatorV3Interface feed;
         uint256 stalenessThreshold; // seconds
@@ -27,20 +26,13 @@ contract PriceOracle is Ownable {
     constructor(address initialOwner) Ownable(initialOwner) {}
 
     /// @notice Register a Chainlink price feed for a token
-    function registerFeed(
-        address token,
-        address feed,
-        uint256 stalenessThreshold
-    ) external onlyOwner {
+    function registerFeed(address token, address feed, uint256 stalenessThreshold) external onlyOwner {
         if (token == address(0) || feed == address(0)) revert ZeroAddress();
         if (!feeds[token].active) {
             registeredTokens.push(token);
         }
-        feeds[token] = FeedConfig({
-            feed: AggregatorV3Interface(feed),
-            stalenessThreshold: stalenessThreshold,
-            active: true
-        });
+        feeds[token] =
+            FeedConfig({feed: AggregatorV3Interface(feed), stalenessThreshold: stalenessThreshold, active: true});
         emit FeedRegistered(token, feed, stalenessThreshold);
     }
 
@@ -50,12 +42,7 @@ contract PriceOracle is Ownable {
         FeedConfig memory config = feeds[token];
         if (!config.active) revert FeedNotFound(token);
 
-        (
-            ,
-            int256 answer,
-            ,
-            uint256 updatedAt,
-        ) = config.feed.latestRoundData();
+        (, int256 answer,, uint256 updatedAt,) = config.feed.latestRoundData();
 
         if (answer <= 0) revert InvalidPrice();
 
@@ -72,9 +59,7 @@ contract PriceOracle is Ownable {
         FeedConfig memory config = feeds[token];
         if (!config.active) return (0, false);
 
-        try config.feed.latestRoundData() returns (
-            uint80, int256 answer, uint256, uint256 updatedAt, uint80
-        ) {
+        try config.feed.latestRoundData() returns (uint80, int256 answer, uint256, uint256 updatedAt, uint80) {
             if (answer <= 0) return (0, false);
             if (block.timestamp - updatedAt > config.stalenessThreshold) return (0, false);
             return (uint256(answer), true);

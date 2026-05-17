@@ -28,11 +28,7 @@ contract Vault is ERC4626, Ownable, ReentrancyGuard {
         address initialOwner,
         address _feeRecipient,
         uint256 _feeBps
-    )
-        ERC4626(asset_)
-        ERC20(name_, symbol_)
-        Ownable(initialOwner)
-    {
+    ) ERC4626(asset_) ERC20(name_, symbol_) Ownable(initialOwner) {
         if (_feeRecipient == address(0)) revert ZeroAddress();
         if (_feeBps > MAX_FEE_BPS) revert FeeTooHigh();
         feeRecipient = _feeRecipient;
@@ -40,22 +36,26 @@ contract Vault is ERC4626, Ownable, ReentrancyGuard {
     }
 
     /// @notice Deposit assets, receive vault shares
-    function deposit(uint256 assets, address receiver)
-        public override nonReentrant returns (uint256 shares)
-    {
+    function deposit(uint256 assets, address receiver) public override nonReentrant returns (uint256 shares) {
         shares = super.deposit(assets, receiver);
     }
 
     /// @notice Withdraw assets by burning shares
     function withdraw(uint256 assets, address receiver, address owner_)
-        public override nonReentrant returns (uint256 shares)
+        public
+        override
+        nonReentrant
+        returns (uint256 shares)
     {
         shares = super.withdraw(assets, receiver, owner_);
     }
 
     /// @notice Redeem shares for assets
     function redeem(uint256 shares, address receiver, address owner_)
-        public override nonReentrant returns (uint256 assets)
+        public
+        override
+        nonReentrant
+        returns (uint256 assets)
     {
         assets = super.redeem(shares, receiver, owner_);
     }
@@ -80,16 +80,12 @@ contract Vault is ERC4626, Ownable, ReentrancyGuard {
     }
 
     /// @notice ERC-4626 rounding: shares round DOWN on deposit (safe for users)
-    function _convertToShares(uint256 assets, Math.Rounding rounding)
-        internal view override returns (uint256)
-    {
+    function _convertToShares(uint256 assets, Math.Rounding rounding) internal view override returns (uint256) {
         return super._convertToShares(assets, rounding);
     }
 
     /// @notice ERC-4626 rounding: assets round DOWN on withdraw (safe for vault)
-    function _convertToAssets(uint256 shares, Math.Rounding rounding)
-        internal view override returns (uint256)
-    {
+    function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view override returns (uint256) {
         return super._convertToAssets(shares, rounding);
     }
 }

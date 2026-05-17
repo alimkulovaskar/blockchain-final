@@ -40,12 +40,11 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
     }
 
     /// @notice Add liquidity and receive LP tokens
-    function addLiquidity(
-        uint256 amountADesired,
-        uint256 amountBDesired,
-        uint256 amountAMin,
-        uint256 amountBMin
-    ) external nonReentrant returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
+    function addLiquidity(uint256 amountADesired, uint256 amountBDesired, uint256 amountAMin, uint256 amountBMin)
+        external
+        nonReentrant
+        returns (uint256 amountA, uint256 amountB, uint256 liquidity)
+    {
         if (amountADesired == 0 || amountBDesired == 0) revert ZeroAmount();
 
         if (reserveA == 0 && reserveB == 0) {
@@ -71,10 +70,7 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
             liquidity = _sqrt(amountA * amountB) - MINIMUM_LIQUIDITY;
             _mint(address(0xdead), MINIMUM_LIQUIDITY); // lock minimum liquidity
         } else {
-            liquidity = _min(
-                (amountA * totalSupply_) / reserveA,
-                (amountB * totalSupply_) / reserveB
-            );
+            liquidity = _min((amountA * totalSupply_) / reserveA, (amountB * totalSupply_) / reserveB);
         }
 
         if (liquidity == 0) revert InsufficientLiquidity();
@@ -91,11 +87,11 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
     }
 
     /// @notice Remove liquidity by burning LP tokens
-    function removeLiquidity(
-        uint256 lpAmount,
-        uint256 amountAMin,
-        uint256 amountBMin
-    ) external nonReentrant returns (uint256 amountA, uint256 amountB) {
+    function removeLiquidity(uint256 lpAmount, uint256 amountAMin, uint256 amountBMin)
+        external
+        nonReentrant
+        returns (uint256 amountA, uint256 amountB)
+    {
         if (lpAmount == 0) revert ZeroAmount();
 
         uint256 totalSupply_ = totalSupply();
@@ -118,17 +114,17 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
     }
 
     /// @notice Swap tokenA for tokenB or vice versa
-    function swap(
-        address tokenIn,
-        uint256 amountIn,
-        uint256 amountOutMin
-    ) external nonReentrant returns (uint256 amountOut) {
+    function swap(address tokenIn, uint256 amountIn, uint256 amountOutMin)
+        external
+        nonReentrant
+        returns (uint256 amountOut)
+    {
         if (tokenIn != address(tokenA) && tokenIn != address(tokenB)) revert InvalidToken();
         if (amountIn == 0) revert ZeroAmount();
 
         bool isTokenA = tokenIn == address(tokenA);
 
-        uint256 reserveIn  = isTokenA ? reserveA : reserveB;
+        uint256 reserveIn = isTokenA ? reserveA : reserveB;
         uint256 reserveOut = isTokenA ? reserveB : reserveA;
 
         // 0.3% fee applied
@@ -162,7 +158,7 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
     function getAmountOut(address tokenIn, uint256 amountIn) external view returns (uint256) {
         if (tokenIn != address(tokenA) && tokenIn != address(tokenB)) revert InvalidToken();
         bool isTokenA = tokenIn == address(tokenA);
-        uint256 reserveIn  = isTokenA ? reserveA : reserveB;
+        uint256 reserveIn = isTokenA ? reserveA : reserveB;
         uint256 reserveOut = isTokenA ? reserveB : reserveA;
         uint256 amountInWithFee = amountIn * FEE_NUMERATOR;
         return (amountInWithFee * reserveOut) / (reserveIn * FEE_DENOMINATOR + amountInWithFee);
@@ -172,8 +168,13 @@ contract AMM is ERC20, ReentrancyGuard, Ownable {
         if (y > 3) {
             z = y;
             uint256 x = y / 2 + 1;
-            while (x < z) { z = x; x = (y / x + x) / 2; }
-        } else if (y != 0) { z = 1; }
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
     }
 
     function _min(uint256 a, uint256 b) internal pure returns (uint256) {

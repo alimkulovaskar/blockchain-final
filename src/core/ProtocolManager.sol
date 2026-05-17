@@ -7,12 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 /// @title ProtocolManager V1 — UUPS upgradeable protocol registry
-contract ProtocolManagerV1 is
-    Initializable,
-    OwnableUpgradeable,
-    PausableUpgradeable,
-    UUPSUpgradeable
-{
+contract ProtocolManagerV1 is Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
     address public amm;
     address public vault;
     address public oracle;
@@ -26,7 +21,9 @@ contract ProtocolManagerV1 is
     error ZeroAddress();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() { _disableInitializers(); }
+    constructor() {
+        _disableInitializers();
+    }
 
     function initialize(address initialOwner) external initializer {
         __Ownable_init(initialOwner);
@@ -63,8 +60,13 @@ contract ProtocolManagerV1 is
         emit AddressWhitelisted(addr, status);
     }
 
-    function pause() external onlyOwner { _pause(); }
-    function unpause() external onlyOwner { _unpause(); }
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 }

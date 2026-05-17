@@ -27,23 +27,28 @@ contract MockAggregator is AggregatorV3Interface {
         _updatedAt = timestamp;
     }
 
-    function latestRoundData() external view override returns (
-        uint80 roundId,
-        int256 answer,
-        uint256 startedAt,
-        uint256 updatedAt,
-        uint80 answeredInRound
-    ) {
+    function latestRoundData()
+        external
+        view
+        override
+        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
+    {
         return (_roundId, _price, _updatedAt, _updatedAt, _roundId);
     }
 
-    function getRoundData(uint80) external view override returns (
-        uint80, int256, uint256, uint256, uint80
-    ) {
+    function getRoundData(uint80) external view override returns (uint80, int256, uint256, uint256, uint80) {
         return (_roundId, _price, _updatedAt, _updatedAt, _roundId);
     }
 
-    function decimals() external view override returns (uint8) { return _decimals; }
-    function description() external pure override returns (string memory) { return "Mock"; }
-    function version() external pure override returns (uint256) { return 1; }
+    function decimals() external view override returns (uint8) {
+        return _decimals;
+    }
+
+    function description() external pure override returns (string memory) {
+        return "Mock";
+    }
+
+    function version() external pure override returns (uint256) {
+        return 1;
+    }
 }

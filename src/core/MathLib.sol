@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 /// @title MathLib — Yul assembly optimized math vs pure Solidity equivalent
 /// @dev Benchmarked: assembly sqrt ~40% cheaper gas than pure Solidity version
 contract MathLib {
-
     // ─────────────────────────────────────────────
     // YUL ASSEMBLY IMPLEMENTATIONS
     // ─────────────────────────────────────────────
