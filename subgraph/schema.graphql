@@ -1,0 +1,86 @@
+type Token @entity {
+  id: ID!
+  owner: Bytes!
+  totalSupply: BigInt!
+  symbol: String!
+  name: String!
+  decimals: Int!
+}
+
+type Pool @entity {
+  id: ID!
+  tokenA: Bytes!
+  tokenB: Bytes!
+  reserveA: BigInt!
+  reserveB: BigInt!
+  totalLPSupply: BigInt!
+  txCount: BigInt!
+  createdAt: BigInt!
+}
+
+type Swap @entity {
+  id: ID!
+  pool: Pool!
+  user: Bytes!
+  tokenIn: Bytes!
+  amountIn: BigInt!
+  amountOut: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type LiquidityEvent @entity {
+  id: ID!
+  pool: Pool!
+  provider: Bytes!
+  amountA: BigInt!
+  amountB: BigInt!
+  lpTokens: BigInt!
+  eventType: String!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type Proposal @entity {
+  id: ID!
+  proposalId: BigInt!
+  proposer: Bytes!
+  description: String!
+  startBlock: BigInt!
+  endBlock: BigInt!
+  state: String!
+  forVotes: BigInt!
+  againstVotes: BigInt!
+  abstainVotes: BigInt!
+  createdAt: BigInt!
+}
+
+type Vote @entity {
+  id: ID!
+  proposal: Proposal!
+  voter: Bytes!
+  support: Int!
+  weight: BigInt!
+  reason: String!
+  timestamp: BigInt!
+}
+
+type VaultDeposit @entity {
+  id: ID!
+  sender: Bytes!
+  owner: Bytes!
+  assets: BigInt!
+  shares: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type ProtocolStats @entity {
+  id: ID!
+  totalSwaps: BigInt!
+  totalLiquidityEvents: BigInt!
+  totalProposals: BigInt!
+  totalVotes: BigInt!
+  totalVaultDeposits: BigInt!
+  updatedAt: BigInt!
+}

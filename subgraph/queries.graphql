@@ -1,0 +1,66 @@
+# Query 1: Get all swaps for a specific pool
+query GetPoolSwaps($poolId: String!) {
+  swaps(where: { pool: $poolId }, orderBy: timestamp, orderDirection: desc, first: 100) {
+    id
+    user
+    tokenIn
+    amountIn
+    amountOut
+    timestamp
+    blockNumber
+  }
+}
+
+# Query 2: Get all active proposals
+query GetProposals {
+  proposals(orderBy: createdAt, orderDirection: desc) {
+    id
+    proposalId
+    proposer
+    description
+    state
+    forVotes
+    againstVotes
+    abstainVotes
+    startBlock
+    endBlock
+    createdAt
+  }
+}
+
+# Query 3: Get votes for a specific proposal
+query GetProposalVotes($proposalId: String!) {
+  votes(where: { proposal: $proposalId }, orderBy: timestamp, orderDirection: desc) {
+    id
+    voter
+    support
+    weight
+    reason
+    timestamp
+  }
+}
+
+# Query 4: Get vault deposits by user
+query GetVaultDeposits($user: Bytes!) {
+  vaultDeposits(where: { owner: $user }, orderBy: timestamp, orderDirection: desc) {
+    id
+    sender
+    owner
+    assets
+    shares
+    timestamp
+    blockNumber
+  }
+}
+
+# Query 5: Get protocol statistics
+query GetProtocolStats {
+  protocolStats(id: "1") {
+    totalSwaps
+    totalLiquidityEvents
+    totalProposals
+    totalVotes
+    totalVaultDeposits
+    updatedAt
+  }
+}
