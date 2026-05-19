@@ -135,4 +135,40 @@ contract ProtocolManagerV2Test is Test {
         proxy.setFeeRecipient(newRecipient);
         assertEq(proxy.feeRecipient(), newRecipient);
     }
+
+    function test_v2_initializeV2_zeroAddress_reverts() public {
+        ProtocolManagerV2 impl2 = new ProtocolManagerV2();
+        bytes memory initData = abi.encodeWithSelector(
+            ProtocolManagerV2.initializeV2.selector, address(0), 30
+        );
+        vm.expectRevert();
+        new ERC1967Proxy(address(impl2), initData);
+    }
+
+    function test_v2_initializeV2_feeTooHigh_reverts() public {
+        ProtocolManagerV2 impl2 = new ProtocolManagerV2();
+        bytes memory initData = abi.encodeWithSelector(
+            ProtocolManagerV2.initializeV2.selector, feeRecipient, 1001
+        );
+        vm.expectRevert();
+        new ERC1967Proxy(address(impl2), initData);
+    }
+
+    function test_v2_registerVault_zero_reverts() public {
+        vm.prank(proxyOwner);
+        vm.expectRevert(ProtocolManagerV2.ZeroAddress.selector);
+        proxy.registerVault(address(0));
+    }
+
+    function test_v2_registerOracle_zero_reverts() public {
+        vm.prank(proxyOwner);
+        vm.expectRevert(ProtocolManagerV2.ZeroAddress.selector);
+        proxy.registerOracle(address(0));
+    }
+
+    function test_v2_registerGovToken_zero_reverts() public {
+        vm.prank(proxyOwner);
+        vm.expectRevert(ProtocolManagerV2.ZeroAddress.selector);
+        proxy.registerGovToken(address(0));
+    }
 }
