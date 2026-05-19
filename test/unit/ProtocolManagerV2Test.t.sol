@@ -13,9 +13,7 @@ contract ProtocolManagerV2Test is Test {
 
     function setUp() public {
         impl = new ProtocolManagerV2();
-        bytes memory initData = abi.encodeWithSelector(
-            ProtocolManagerV2.initializeV2.selector, feeRecipient, 30
-        );
+        bytes memory initData = abi.encodeWithSelector(ProtocolManagerV2.initializeV2.selector, feeRecipient, 30);
         ERC1967Proxy p = new ERC1967Proxy(address(impl), initData);
         proxy = ProtocolManagerV2(address(p));
         proxyOwner = proxy.owner();
@@ -138,18 +136,14 @@ contract ProtocolManagerV2Test is Test {
 
     function test_v2_initializeV2_zeroAddress_reverts() public {
         ProtocolManagerV2 impl2 = new ProtocolManagerV2();
-        bytes memory initData = abi.encodeWithSelector(
-            ProtocolManagerV2.initializeV2.selector, address(0), 30
-        );
+        bytes memory initData = abi.encodeWithSelector(ProtocolManagerV2.initializeV2.selector, address(0), 30);
         vm.expectRevert();
         new ERC1967Proxy(address(impl2), initData);
     }
 
     function test_v2_initializeV2_feeTooHigh_reverts() public {
         ProtocolManagerV2 impl2 = new ProtocolManagerV2();
-        bytes memory initData = abi.encodeWithSelector(
-            ProtocolManagerV2.initializeV2.selector, feeRecipient, 1001
-        );
+        bytes memory initData = abi.encodeWithSelector(ProtocolManagerV2.initializeV2.selector, feeRecipient, 1001);
         vm.expectRevert();
         new ERC1967Proxy(address(impl2), initData);
     }

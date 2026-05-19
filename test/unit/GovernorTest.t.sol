@@ -9,16 +9,16 @@ import "../../src/governance/GovToken.sol";
 contract GovernorTest is Test {
     DeFiGovernor public governor;
     DeFiTimelock public timelock;
-    GovToken     public token;
+    GovToken public token;
 
-    address public owner   = address(this);
-    address public alice   = makeAddr("alice");
-    address public bob     = makeAddr("bob");
+    address public owner = address(this);
+    address public alice = makeAddr("alice");
+    address public bob = makeAddr("bob");
     address public charlie = makeAddr("charlie");
 
     address[] targets;
     uint256[] values;
-    bytes[]   calldatas;
+    bytes[] calldatas;
     string constant DESC = "Proposal #1: test proposal";
 
     function setUp() public {
@@ -27,7 +27,7 @@ contract GovernorTest is Test {
         // MAX_SUPPLY = 1_000_000e18, so 900_000e18 left
         token.mint(owner, 500_000e18);
         token.mint(alice, 200_000e18);
-        token.mint(bob,   200_000e18);
+        token.mint(bob, 200_000e18);
 
         address[] memory proposers = new address[](1);
         address[] memory executors = new address[](1);
@@ -42,16 +42,18 @@ contract GovernorTest is Test {
         timelock.renounceRole(timelock.DEFAULT_ADMIN_ROLE(), owner);
 
         token.delegate(owner);
-        vm.prank(alice); token.delegate(alice);
-        vm.prank(bob);   token.delegate(bob);
+        vm.prank(alice);
+        token.delegate(alice);
+        vm.prank(bob);
+        token.delegate(bob);
 
         vm.roll(block.number + 1);
 
-        targets   = new address[](1);
-        values    = new uint256[](1);
+        targets = new address[](1);
+        values = new uint256[](1);
         calldatas = new bytes[](1);
-        targets[0]   = address(token);
-        values[0]    = 0;
+        targets[0] = address(token);
+        values[0] = 0;
         calldatas[0] = abi.encodeWithSignature("name()");
     }
 
@@ -70,7 +72,8 @@ contract GovernorTest is Test {
     function _voteAndSucceed(uint256 pid) internal {
         _makeActive(pid);
         governor.castVote(pid, 1);
-        vm.prank(alice); governor.castVote(pid, 1);
+        vm.prank(alice);
+        governor.castVote(pid, 1);
         vm.roll(block.number + governor.votingPeriod() + 1);
         vm.warp(block.timestamp + governor.votingPeriod() + 1);
         assertEq(uint8(governor.state(pid)), uint8(IGovernor.ProposalState.Succeeded));
@@ -130,8 +133,7 @@ contract GovernorTest is Test {
     function test_hashProposal_deterministic() public view {
         bytes32 dh = keccak256(bytes(DESC));
         assertEq(
-            governor.hashProposal(targets, values, calldatas, dh),
-            governor.hashProposal(targets, values, calldatas, dh)
+            governor.hashProposal(targets, values, calldatas, dh), governor.hashProposal(targets, values, calldatas, dh)
         );
     }
 
@@ -266,7 +268,8 @@ contract GovernorTest is Test {
     function test_state_defeated_only_against_votes() public {
         uint256 pid = _propose();
         _makeActive(pid);
-        vm.prank(bob); governor.castVote(pid, 0);
+        vm.prank(bob);
+        governor.castVote(pid, 0);
         vm.roll(block.number + governor.votingPeriod() + 1);
         vm.warp(block.timestamp + governor.votingPeriod() + 1);
         assertEq(uint8(governor.state(pid)), uint8(IGovernor.ProposalState.Defeated));
@@ -333,7 +336,7 @@ contract GovernorTest is Test {
 
     function testFuzz_votingPower_neverExceedsSupply(address voter) public view {
         vm.assume(voter != address(0));
-        uint256 votes  = governor.getVotes(voter, block.number - 1);
+        uint256 votes = governor.getVotes(voter, block.number - 1);
         uint256 supply = token.getPastTotalSupply(block.number - 1);
         assertLe(votes, supply);
     }

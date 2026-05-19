@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockERC20 is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
+
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
@@ -16,10 +17,10 @@ contract VaultTest is Test {
     Vault public vault;
     MockERC20 public asset;
 
-    address public owner   = makeAddr("owner");
+    address public owner = makeAddr("owner");
     address public feeRecip = makeAddr("feeRecip");
-    address public alice   = makeAddr("alice");
-    address public bob     = makeAddr("bob");
+    address public alice = makeAddr("alice");
+    address public bob = makeAddr("bob");
 
     uint256 constant INITIAL = 10_000 ether;
 
@@ -244,24 +245,12 @@ contract VaultTest is Test {
 
     function test_revert_constructor_zeroFeeRecipient() public {
         vm.expectRevert(Vault.ZeroAddress.selector);
-        new Vault(
-            IERC20(address(asset)),
-            "Test", "TST",
-            owner,
-            address(0),
-            100
-        );
+        new Vault(IERC20(address(asset)), "Test", "TST", owner, address(0), 100);
     }
 
     function test_revert_constructor_feeTooHigh() public {
         vm.expectRevert(Vault.FeeTooHigh.selector);
-        new Vault(
-            IERC20(address(asset)),
-            "Test", "TST",
-            owner,
-            feeRecip,
-            1001
-        );
+        new Vault(IERC20(address(asset)), "Test", "TST", owner, feeRecip, 1001);
     }
 
     // ── Fuzz ─────────────────────────────────────────────

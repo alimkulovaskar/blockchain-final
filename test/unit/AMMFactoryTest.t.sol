@@ -7,7 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockERC20 is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
-    function mint(address to, uint256 amount) external { _mint(to, amount); }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }
 
 contract AMMFactoryTest is Test {
@@ -32,9 +35,8 @@ contract AMMFactoryTest is Test {
 
     function test_createPair_storesMapping() public {
         address pair = factory.createPair(address(tokenA), address(tokenB));
-        (address t0, address t1) = address(tokenA) < address(tokenB)
-            ? (address(tokenA), address(tokenB))
-            : (address(tokenB), address(tokenA));
+        (address t0, address t1) =
+            address(tokenA) < address(tokenB) ? (address(tokenA), address(tokenB)) : (address(tokenB), address(tokenA));
         assertEq(factory.getPair(t0, t1), pair);
         assertEq(factory.getPair(t1, t0), pair);
     }

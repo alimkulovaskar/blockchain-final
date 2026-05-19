@@ -10,12 +10,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ForkTest is Test {
     // Deployed on Ethereum Sepolia
-    address constant GOVTOKEN  = 0xEEefFe6B263cEfA393c17956B5c7f858DfC5d8BF;
-    address constant VAULT     = 0xeAcE26701a6ee1DD2Efaf4e5A687c004B3c7d4C5;
-    address constant ORACLE    = 0x751da915beCFCF2Fa89d09c61f6a4e220Da7552b;
-    address constant TIMELOCK  = 0xAfFbc5496C53be9678Df73f773C3c9781b6D0e10;
-    address constant GOVERNOR  = 0x87A4FD656a5337014fFa31CeBC1Ef709FAD8D6C1;
-    address constant DEPLOYER  = 0xF0aAcf323267D465d1107f2ef055A13Af3Bd7acA;
+    address constant GOVTOKEN = 0xEEefFe6B263cEfA393c17956B5c7f858DfC5d8BF;
+    address constant VAULT = 0xeAcE26701a6ee1DD2Efaf4e5A687c004B3c7d4C5;
+    address constant ORACLE = 0x751da915beCFCF2Fa89d09c61f6a4e220Da7552b;
+    address constant TIMELOCK = 0xAfFbc5496C53be9678Df73f773C3c9781b6D0e10;
+    address constant GOVERNOR = 0x87A4FD656a5337014fFa31CeBC1Ef709FAD8D6C1;
+    address constant DEPLOYER = 0xF0aAcf323267D465d1107f2ef055A13Af3Bd7acA;
 
     // Real Chainlink ETH/USD on Ethereum Sepolia
     address constant CHAINLINK_ETH_USD_SEPOLIA = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
@@ -23,10 +23,8 @@ contract ForkTest is Test {
     uint256 sepoliaFork;
 
     function setUp() public {
-        string memory rpc = vm.envOr(
-            "ETH_SEPOLIA_RPC_URL",
-            string("https://eth-sepolia.g.alchemy.com/v2/iwDvR-bqVnt8x4WvHuT2b")
-        );
+        string memory rpc =
+            vm.envOr("ETH_SEPOLIA_RPC_URL", string("https://eth-sepolia.g.alchemy.com/v2/iwDvR-bqVnt8x4WvHuT2b"));
         sepoliaFork = vm.createFork(rpc);
         vm.selectFork(sepoliaFork);
     }
@@ -63,14 +61,14 @@ contract ForkTest is Test {
         oracle.registerFeed(weth, CHAINLINK_ETH_USD_SEPOLIA, 3600);
 
         uint256 price = oracle.getPrice(weth);
-        assertGt(price, 100e8);       // ETH > $100
-        assertLt(price, 100_000e8);   // ETH < $100,000
+        assertGt(price, 100e8); // ETH > $100
+        assertLt(price, 100_000e8); // ETH < $100,000
     }
 
     /// @dev Fork test 5: Deposit into deployed Vault works on fork
     function test_fork_depositIntoVault() public {
         GovToken token = GovToken(GOVTOKEN);
-        Vault vault    = Vault(VAULT);
+        Vault vault = Vault(VAULT);
 
         address user = makeAddr("forkUser");
 

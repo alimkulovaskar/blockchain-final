@@ -128,8 +128,8 @@ contract OracleTest is Test {
     }
 
     function test_mockAggregator_latestRoundData_fields() public view {
-        (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)
-            = feed.latestRoundData();
+        (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound) =
+            feed.latestRoundData();
         assertEq(answer, 2000e8);
         assertEq(roundId, answeredInRound);
         assertEq(startedAt, updatedAt);
@@ -164,7 +164,7 @@ contract OracleTest is Test {
     }
 
     function test_mockAggregator_constructor_sets_initial_price() public view {
-        (,int256 answer,,,) = feed.latestRoundData();
+        (, int256 answer,,,) = feed.latestRoundData();
         assertEq(answer, 2000e8);
     }
 
@@ -196,17 +196,23 @@ contract OracleTest is Test {
 }
 
 contract BrokenFeed is AggregatorV3Interface {
-    function latestRoundData() external pure override
-        returns (uint80, int256, uint256, uint256, uint80)
-    {
+    function latestRoundData() external pure override returns (uint80, int256, uint256, uint256, uint80) {
         revert("broken");
     }
-    function getRoundData(uint80) external pure override
-        returns (uint80, int256, uint256, uint256, uint80)
-    {
+
+    function getRoundData(uint80) external pure override returns (uint80, int256, uint256, uint256, uint80) {
         revert("broken");
     }
-    function decimals() external pure override returns (uint8) { return 8; }
-    function description() external pure override returns (string memory) { return "broken"; }
-    function version() external pure override returns (uint256) { return 1; }
+
+    function decimals() external pure override returns (uint8) {
+        return 8;
+    }
+
+    function description() external pure override returns (string memory) {
+        return "broken";
+    }
+
+    function version() external pure override returns (uint256) {
+        return 1;
+    }
 }

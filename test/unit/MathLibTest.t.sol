@@ -28,9 +28,9 @@ contract MathLibTest is Test {
     }
 
     function test_sqrtMatchesSolidity(uint128 x) public view {
-    vm.assume(x == 0 || x >= 4);
-    assertEq(math.sqrtAssembly(x), math.sqrtSolidity(x));
-}
+        vm.assume(x == 0 || x >= 4);
+        assertEq(math.sqrtAssembly(x), math.sqrtSolidity(x));
+    }
 
     function test_minAssembly() public view {
         assertEq(math.minAssembly(3, 5), 3);
