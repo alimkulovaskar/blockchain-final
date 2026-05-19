@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeFi Super-App</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+    header { background: #1a1a2e; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+    header h1 { color: #7c3aed; font-size: 1.5rem; }
+    .connect-btn { background: #7c3aed; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+    .connect-btn:hover { background: #6d28d9; }
+    .network-warning { background: #7f1d1d; color: #fca5a5; padding: 0.75rem 2rem; text-align: center; display: none; }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 1.25rem; }
+    .stat-card .label { font-size: 0.8rem; color: #9ca3af; margin-bottom: 0.5rem; }
+    .stat-card .value { font-size: 1.4rem; font-weight: 600; color: #7c3aed; }
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .tab { background: #1a1a2e; border: 1px solid #333; color: #9ca3af; padding: 0.5rem 1.25rem; border-radius: 8px; cursor: pointer; }
+    .tab.active { background: #7c3aed; color: white; border-color: #7c3aed; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: #1a1a2e; border: 1px solid #333; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .card h3 { color: #a78bfa; margin-bottom: 1rem; font-size: 1rem; }
+    input, select { width: 100%; background: #0f0f1a; border: 1px solid #444; color: #e0e0e0; padding: 0.6rem 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; font-size: 0.95rem; }
+    .btn { background: #7c3aed; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.95rem; width: 100%; }
+    .btn:hover { background: #6d28d9; }
+    .btn:disabled { background: #4b5563; cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid #7c3aed; color: #7c3aed; }
+    .btn-outline:hover { background: #7c3aed; color: white; }
+    .msg { margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; display: none; }
+    .msg.success { background: #064e3b; color: #6ee7b7; display: block; }
+    .msg.error { background: #7f1d1d; color: #fca5a5; display: block; }
+    .msg.info { background: #1e3a5f; color: #93c5fd; display: block; }
+    .proposal-card { background: #0f0f1a; border: 1px solid #333; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+    .proposal-card .prop-id { font-size: 0.75rem; color: #6b7280; }
+    .proposal-card .prop-desc { margin: 0.5rem 0; font-size: 0.9rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-active { background: #064e3b; color: #6ee7b7; }
+    .badge-pending { background: #1e3a5f; color: #93c5fd; }
+    .badge-succeeded { background: #3b1f6e; color: #c4b5fd; }
+    .badge-defeated { background: #7f1d1d; color: #fca5a5; }
+    .vote-bar { display: flex; gap: 0.5rem; margin: 0.5rem 0; font-size: 0.8rem; }
+    .subgraph-data { font-size: 0.85rem; color: #9ca3af; }
+    .subgraph-data table { width: 100%; border-collapse: collapse; }
+    .subgraph-data th { text-align: left; padding: 0.5rem; border-bottom: 1px solid #333; color: #7c3aed; }
+    .subgraph-data td { padding: 0.5rem; border-bottom: 1px solid #1a1a2e; }
+    .address { font-family: monospace; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+
+<div class="network-warning" id="networkWarning">
+  ⚠️ Wrong network! Please switch to <strong>Ethereum Sepolia</strong> (Chain ID: 11155111)
+  <button onclick="switchNetwork()" style="margin-left:1rem;padding:0.3rem 0.75rem;border-radius:6px;border:none;background:#ef4444;color:white;cursor:pointer">Switch Network</button>
+</div>
+
+<header>
+  <h1>⚡ DeFi Super-App</h1>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <span id="walletAddress" style="font-size:0.85rem;color:#9ca3af;font-family:monospace"></span>
+    <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">DGT Balance</div>
+      <div class="value" id="tokenBalance">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Voting Power</div>
+      <div class="value" id="votingPower">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Delegated To</div>
+      <div class="value" id="delegateTo" style="font-size:0.85rem;word-break:break-all">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Vault Shares</div>
+      <div class="value" id="vaultShares">—</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('swap')">🔄 Swap</button>
+    <button class="tab" onclick="showTab('vault')">🏦 Vault</button>
+    <button class="tab" onclick="showTab('governance')">🗳️ Governance</button>
+    <button class="tab" onclick="showTab('subgraph')">📊 Analytics</button>
+  </div>
+
+  <!-- SWAP TAB -->
+  <div class="panel active" id="tab-swap">
+    <div class="card">
+      <h3>🔄 Swap Tokens (AMM)</h3>
+      <label style="font-size:0.85rem;color:#9ca3af">AMM Pair Address</label>
+      <input type="text" id="ammAddress" placeholder="0x... AMM pair address" />
+      <label style="font-size:0.85rem;color:#9ca3af">Token In Address</label>
+      <input type="text" id="tokenIn" placeholder="0x... token to sell" />
+      <label style="font-size:0.85rem;color:#9ca3af">Amount In</label>
+      <input type="number" id="amountIn" placeholder="Amount to swap" />
+      <label style="font-size:0.85rem;color:#9ca3af">Min Amount Out (slippage protection)</label>
+      <input type="number" id="amountOutMin" placeholder="Minimum output" value="0" />
+      <button class="btn" onclick="doSwap()">Swap</button>
+      <div class="msg" id="swapMsg"></div>
+    </div>
+
+    <div class="card">
+      <h3>💧 Add Liquidity</h3>
+      <input type="text" id="ammAddressLiq" placeholder="AMM pair address" />
+      <input type="number" id="amountA" placeholder="Amount Token A" />
+      <input type="number" id="amountB" placeholder="Amount Token B" />
+      <button class="btn" onclick="addLiquidity()">Add Liquidity</button>
+      <div class="msg" id="liqMsg"></div>
+    </div>
+  </div>
+
+  <!-- VAULT TAB -->
+  <div class="panel" id="tab-vault">
+    <div class="card">
+      <h3>🏦 Deposit into ERC-4626 Vault</h3>
+      <p style="font-size:0.85rem;color:#9ca3af;margin-bottom:1rem">Vault: <span class="address">0xeAcE26701a6ee1DD2Efaf4e5A687c004B3c7d4C5</span></p>
+      <label style="font-size:0.85rem;color:#9ca3af">Amount DGT to deposit</label>
+      <input type="number" id="depositAmount" placeholder="Amount to deposit" />
+      <button class="btn" onclick="doDeposit()">Approve & Deposit</button>
+      <div class="msg" id="depositMsg"></div>
+    </div>
+    <div class="card">
+      <h3>📤 Redeem from Vault</h3>
+      <label style="font-size:0.85rem;color:#9ca3af">Shares to redeem</label>
+      <input type="number" id="redeemAmount" placeholder="Shares to redeem" />
+      <button class="btn btn-outline" onclick="doRedeem()">Redeem</button>
+      <div class="msg" id="redeemMsg"></div>
+    </div>
+  </div>
+
+  <!-- GOVERNANCE TAB -->
+  <div class="panel" id="tab-governance">
+    <div class="card">
+      <h3>🗳️ Delegate Voting Power</h3>
+      <input type="text" id="delegateAddress" placeholder="Address to delegate to (or your own)" />
+      <button class="btn" onclick="doDelegate()">Delegate</button>
+      <div class="msg" id="delegateMsg"></div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Active Proposals</h3>
+      <div id="proposalsList">
+        <div class="proposal-card">
+          <div class="prop-id">#1 — Demo Proposal</div>
+          <div class="prop-desc">Set protocol fee to 0.3% via governance</div>
+          <span class="badge badge-active">Active</span>
+          <div class="vote-bar">
+            <span style="color:#6ee7b7">✓ For: 45,000</span>
+            <span style="color:#fca5a5">✗ Against: 5,000</span>
+            <span style="color:#9ca3af">∅ Abstain: 2,000</span>
+          </div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem">
+            <button class="btn" style="background:#059669" onclick="castVote('1', 1)">Vote For</button>
+            <button class="btn" style="background:#dc2626" onclick="castVote('1', 0)">Vote Against</button>
+            <button class="btn" style="background:#6b7280" onclick="castVote('1', 2)">Abstain</button>
+          </div>
+        </div>
+      </div>
+      <div class="msg" id="voteMsg"></div>
+    </div>
+  </div>
+
+  <!-- SUBGRAPH TAB -->
+  <div class="panel" id="tab-subgraph">
+    <div class="card">
+      <h3>📊 Protocol Analytics (from The Graph)</h3>
+      <p style="font-size:0.85rem;color:#9ca3af;margin-bottom:1rem">Subgraph endpoint: The Graph Studio (Sepolia)</p>
+      <button class="btn" style="margin-bottom:1rem" onclick="loadSubgraphData()">Load Analytics</button>
+      <div id="subgraphContent" class="subgraph-data">
+        <table>
+          <tr><th>Metric</th><th>Value</th></tr>
+          <tr><td>Total Swaps</td><td id="sg-swaps">—</td></tr>
+          <tr><td>Total Liquidity Events</td><td id="sg-liq">—</td></tr>
+          <tr><td>Total Proposals</td><td id="sg-proposals">—</td></tr>
+          <tr><td>Total Votes Cast</td><td id="sg-votes">—</td></tr>
+          <tr><td>Total Vault Deposits</td><td id="sg-deposits">—</td></tr>
+        </table>
+      </div>
+      <div class="msg" id="subgraphMsg"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ─── Contract Addresses ───────────────────────────────────────
+const GOVTOKEN  = "0xEEefFe6B263cEfA393c17956B5c7f858DfC5d8BF";
+const VAULT     = "0xeAcE26701a6ee1DD2Efaf4e5A687c004B3c7d4C5";
+const GOVERNOR  = "0x87A4FD656a5337014fFa31CeBC1Ef709FAD8D6C1";
+const SEPOLIA_CHAIN_ID = 11155111;
+
+// ─── ABIs ─────────────────────────────────────────────────────
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)",
+  "function allowance(address,address) view returns (uint256)",
+  "function delegate(address)",
+  "function delegates(address) view returns (address)",
+  "function getVotes(address) view returns (uint256)",
+];
+const VAULT_ABI = [
+  "function deposit(uint256,address) returns (uint256)",
+  "function redeem(uint256,address,address) returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function totalAssets() view returns (uint256)",
+];
+const AMM_ABI = [
+  "function swap(address,uint256,uint256) returns (uint256)",
+  "function addLiquidity(uint256,uint256,uint256,uint256) returns (uint256,uint256,uint256)",
+];
+const GOVERNOR_ABI = [
+  "function castVoteWithReason(uint256,uint8,string) returns (uint256)",
+  "function state(uint256) view returns (uint8)",
+];
+
+// ─── State ────────────────────────────────────────────────────
+let provider, signer, userAddress;
+
+// ─── Wallet ───────────────────────────────────────────────────
+async function connectWallet() {
+  if (!window.ethereum) {
+    showMsg("swapMsg", "MetaMask not found! Please install MetaMask.", "error");
+    return;
+  }
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    document.getElementById("walletAddress").textContent =
+      userAddress.slice(0, 6) + "..." + userAddress.slice(-4);
+    document.getElementById("connectBtn").textContent = "Connected";
+    document.getElementById("connectBtn").style.background = "#059669";
+
+    await checkNetwork();
+    await loadUserData();
+
+    window.ethereum.on("chainChanged", () => window.location.reload());
+    window.ethereum.on("accountsChanged", () => window.location.reload());
+  } catch (e) {
+    showMsg("swapMsg", "Connection rejected: " + e.message, "error");
+  }
+}
+
+async function checkNetwork() {
+  const network = await provider.getNetwork();
+  const warning = document.getElementById("networkWarning");
+  if (network.chainId !== SEPOLIA_CHAIN_ID) {
+    warning.style.display = "block";
+  } else {
+    warning.style.display = "none";
+  }
+}
+
+async function switchNetwork() {
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0xaa36a7" }],
+    });
+  } catch (e) {
+    alert("Please switch to Ethereum Sepolia manually in MetaMask");
+  }
+}
+
+async function loadUserData() {
+  if (!signer) return;
+  try {
+    const token = new ethers.Contract(GOVTOKEN, ERC20_ABI, provider);
+    const vault = new ethers.Contract(VAULT, VAULT_ABI, provider);
+
+    const [balance, votes, delegate, shares] = await Promise.all([
+      token.balanceOf(userAddress),
+      token.getVotes(userAddress),
+      token.delegates(userAddress),
+      vault.balanceOf(userAddress),
+    ]);
+
+    document.getElementById("tokenBalance").textContent =
+      parseFloat(ethers.utils.formatEther(balance)).toFixed(2) + " DGT";
+    document.getElementById("votingPower").textContent =
+      parseFloat(ethers.utils.formatEther(votes)).toFixed(2);
+    document.getElementById("delegateTo").textContent =
+      delegate === ethers.constants.AddressZero
+        ? "None"
+        : delegate.slice(0, 6) + "..." + delegate.slice(-4);
+    document.getElementById("vaultShares").textContent =
+      parseFloat(ethers.utils.formatEther(shares)).toFixed(4);
+  } catch (e) {
+    console.error("loadUserData:", e);
+  }
+}
+
+// ─── Swap ─────────────────────────────────────────────────────
+async function doSwap() {
+  if (!signer) return showMsg("swapMsg", "Connect wallet first!", "error");
+  const ammAddr  = document.getElementById("ammAddress").value.trim();
+  const tokenIn  = document.getElementById("tokenIn").value.trim();
+  const amountIn = document.getElementById("amountIn").value;
+  const minOut   = document.getElementById("amountOutMin").value;
+
+  if (!ammAddr || !tokenIn || !amountIn) return showMsg("swapMsg", "Fill all fields!", "error");
+
+  try {
+    showMsg("swapMsg", "Approving token...", "info");
+    const token = new ethers.Contract(tokenIn, ERC20_ABI, signer);
+    const amtWei = ethers.utils.parseEther(amountIn);
+    const approveTx = await token.approve(ammAddr, amtWei);
+    await approveTx.wait();
+
+    showMsg("swapMsg", "Swapping...", "info");
+    const amm = new ethers.Contract(ammAddr, AMM_ABI, signer);
+    const minWei = ethers.utils.parseEther(minOut || "0");
+    const tx = await amm.swap(tokenIn, amtWei, minWei);
+    await tx.wait();
+
+    showMsg("swapMsg", "✅ Swap successful! Tx: " + tx.hash, "success");
+    await loadUserData();
+  } catch (e) {
+    showMsg("swapMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+async function addLiquidity() {
+  if (!signer) return showMsg("liqMsg", "Connect wallet first!", "error");
+  const ammAddr = document.getElementById("ammAddressLiq").value.trim();
+  const amtA = document.getElementById("amountA").value;
+  const amtB = document.getElementById("amountB").value;
+  if (!ammAddr || !amtA || !amtB) return showMsg("liqMsg", "Fill all fields!", "error");
+
+  try {
+    showMsg("liqMsg", "Adding liquidity...", "info");
+    const amm = new ethers.Contract(ammAddr, AMM_ABI, signer);
+    const tx = await amm.addLiquidity(
+      ethers.utils.parseEther(amtA),
+      ethers.utils.parseEther(amtB),
+      0, 0
+    );
+    await tx.wait();
+    showMsg("liqMsg", "✅ Liquidity added! Tx: " + tx.hash, "success");
+  } catch (e) {
+    showMsg("liqMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+// ─── Vault ────────────────────────────────────────────────────
+async function doDeposit() {
+  if (!signer) return showMsg("depositMsg", "Connect wallet first!", "error");
+  const amount = document.getElementById("depositAmount").value;
+  if (!amount) return showMsg("depositMsg", "Enter amount!", "error");
+
+  try {
+    const amtWei = ethers.utils.parseEther(amount);
+    showMsg("depositMsg", "Approving DGT...", "info");
+    const token = new ethers.Contract(GOVTOKEN, ERC20_ABI, signer);
+    const approveTx = await token.approve(VAULT, amtWei);
+    await approveTx.wait();
+
+    showMsg("depositMsg", "Depositing into vault...", "info");
+    const vault = new ethers.Contract(VAULT, VAULT_ABI, signer);
+    const tx = await vault.deposit(amtWei, userAddress);
+    await tx.wait();
+
+    showMsg("depositMsg", "✅ Deposited! Tx: " + tx.hash, "success");
+    await loadUserData();
+  } catch (e) {
+    showMsg("depositMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+async function doRedeem() {
+  if (!signer) return showMsg("redeemMsg", "Connect wallet first!", "error");
+  const shares = document.getElementById("redeemAmount").value;
+  if (!shares) return showMsg("redeemMsg", "Enter shares!", "error");
+
+  try {
+    showMsg("redeemMsg", "Redeeming shares...", "info");
+    const vault = new ethers.Contract(VAULT, VAULT_ABI, signer);
+    const sharesWei = ethers.utils.parseEther(shares);
+    const tx = await vault.redeem(sharesWei, userAddress, userAddress);
+    await tx.wait();
+    showMsg("redeemMsg", "✅ Redeemed! Tx: " + tx.hash, "success");
+    await loadUserData();
+  } catch (e) {
+    showMsg("redeemMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+// ─── Governance ───────────────────────────────────────────────
+async function doDelegate() {
+  if (!signer) return showMsg("delegateMsg", "Connect wallet first!", "error");
+  const addr = document.getElementById("delegateAddress").value.trim() || userAddress;
+
+  try {
+    showMsg("delegateMsg", "Delegating...", "info");
+    const token = new ethers.Contract(GOVTOKEN, ERC20_ABI, signer);
+    const tx = await token.delegate(addr);
+    await tx.wait();
+    showMsg("delegateMsg", "✅ Delegated to " + addr, "success");
+    await loadUserData();
+  } catch (e) {
+    showMsg("delegateMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+async function castVote(proposalId, support) {
+  if (!signer) return showMsg("voteMsg", "Connect wallet first!", "error");
+  const reasons = ["Against", "For", "Abstain"];
+  try {
+    showMsg("voteMsg", "Casting vote...", "info");
+    const gov = new ethers.Contract(GOVERNOR, GOVERNOR_ABI, signer);
+    const tx = await gov.castVoteWithReason(proposalId, support, "Voted via DeFi Super-App");
+    await tx.wait();
+    showMsg("voteMsg", "✅ Vote cast! Tx: " + tx.hash, "success");
+  } catch (e) {
+    showMsg("voteMsg", "❌ " + (e.reason || e.message), "error");
+  }
+}
+
+// ─── Subgraph ─────────────────────────────────────────────────
+async function loadSubgraphData() {
+  showMsg("subgraphMsg", "Loading from The Graph...", "info");
+  const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/YOUR_ID/defi-super-app/v0.0.1";
+  const query = `{
+    protocolStats(id: "1") {
+      totalSwaps totalLiquidityEvents totalProposals totalVotes totalVaultDeposits
+    }
+  }`;
+  try {
+    const res = await fetch(SUBGRAPH_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    const data = await res.json();
+    if (data.data && data.data.protocolStats) {
+      const s = data.data.protocolStats;
+      document.getElementById("sg-swaps").textContent = s.totalSwaps;
+      document.getElementById("sg-liq").textContent = s.totalLiquidityEvents;
+      document.getElementById("sg-proposals").textContent = s.totalProposals;
+      document.getElementById("sg-votes").textContent = s.totalVotes;
+      document.getElementById("sg-deposits").textContent = s.totalVaultDeposits;
+      document.getElementById("subgraphMsg").style.display = "none";
+    } else {
+      // Show mock data for demo
+      document.getElementById("sg-swaps").textContent = "0 (subgraph not yet deployed)";
+      document.getElementById("sg-liq").textContent = "0";
+      document.getElementById("sg-proposals").textContent = "0";
+      document.getElementById("sg-votes").textContent = "0";
+      document.getElementById("sg-deposits").textContent = "0";
+      showMsg("subgraphMsg", "ℹ️ Subgraph deployed but no events yet (testnet)", "info");
+    }
+  } catch (e) {
+    document.getElementById("sg-swaps").textContent = "N/A";
+    showMsg("subgraphMsg", "ℹ️ Subgraph endpoint not deployed yet — see subgraph/ folder", "info");
+  }
+}
+
+// ─── UI Helpers ───────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  event.target.classList.add("active");
+}
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = "msg " + type;
+}
+
+// Auto-connect if already authorized
+window.addEventListener("load", async () => {
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+    if (accounts.length > 0) connectWallet();
+  }
+});
+</script>
+</body>
+</html>
