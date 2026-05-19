@@ -13,8 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
           submodules: recursive
@@ -32,4 +33,12 @@ jobs:
         run: forge build --sizes
 
       - name: Run Forge tests
+        env:
+          ETH_SEPOLIA_RPC_URL: ${{ secrets.ETH_SEPOLIA_RPC_URL }}
+          ARBITRUM_RPC_URL: ${{ secrets.ARBITRUM_RPC_URL }}
         run: forge test -vvv
+
+      - name: Run Forge coverage
+        env:
+          ETH_SEPOLIA_RPC_URL: ${{ secrets.ETH_SEPOLIA_RPC_URL }}
+        run: forge coverage --report summary
