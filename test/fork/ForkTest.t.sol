@@ -2,98 +2,88 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
+import "../../src/governance/GovToken.sol";
+import "../../src/core/Vault.sol";
 import "../../src/oracle/PriceOracle.sol";
 import "../../src/oracle/MockAggregator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @dev Fork tests — run against real Arbitrum mainnet / Ethereum mainnet state
-/// Set ARB_RPC_URL and ETH_RPC_URL in .env to run these
 contract ForkTest is Test {
-    // Real Chainlink ETH/USD feed on Arbitrum mainnet
-    address constant CHAINLINK_ETH_USD = 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612;
-    // Real USDC on Arbitrum mainnet
-    address constant USDC = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
-    // Uniswap V2 Router on Ethereum mainnet
-    address constant UNISWAP_V2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-    // WETH mainnet
-    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    // Deployed on Ethereum Sepolia
+    address constant GOVTOKEN  = 0xEEefFe6B263cEfA393c17956B5c7f858DfC5d8BF;
+    address constant VAULT     = 0xeAcE26701a6ee1DD2Efaf4e5A687c004B3c7d4C5;
+    address constant ORACLE    = 0x751da915beCFCF2Fa89d09c61f6a4e220Da7552b;
+    address constant TIMELOCK  = 0xAfFbc5496C53be9678Df73f773C3c9781b6D0e10;
+    address constant GOVERNOR  = 0x87A4FD656a5337014fFa31CeBC1Ef709FAD8D6C1;
+    address constant DEPLOYER  = 0xF0aAcf323267D465d1107f2ef055A13Af3Bd7acA;
 
-    PriceOracle public oracle;
-    address public owner = makeAddr("owner");
+    // Real Chainlink ETH/USD on Ethereum Sepolia
+    address constant CHAINLINK_ETH_USD_SEPOLIA = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
 
-    uint256 arbitrumFork;
-    uint256 mainnetFork;
+    uint256 sepoliaFork;
 
     function setUp() public {
-        string memory arbitrumRpc =
-            vm.envOr("ARB_RPC_URL", string("https://arb-mainnet.g.alchemy.com/v2/iwDvR-bqVnt8x4WvHuT2b"));
-        string memory mainnetRpc =
-            vm.envOr("ETH_RPC_URL", string("https://eth-mainnet.g.alchemy.com/v2/iwDvR-bqVnt8x4WvHuT2b"));
-        arbitrumFork = vm.createFork(arbitrumRpc);
-        mainnetFork = vm.createFork(mainnetRpc);
+        string memory rpc = vm.envOr(
+            "ETH_SEPOLIA_RPC_URL",
+            string("https://eth-sepolia.g.alchemy.com/v2/iwDvR-bqVnt8x4WvHuT2b")
+        );
+        sepoliaFork = vm.createFork(rpc);
+        vm.selectFork(sepoliaFork);
     }
 
-    /// @dev Fork test 1: Real Chainlink ETH/USD feed returns valid price
-    function test_fork_chainlinkRealFeed() public {
-        vm.selectFork(arbitrumFork);
-
-        vm.prank(owner);
-        oracle = new PriceOracle(owner);
-
-        vm.prank(owner);
-        oracle.registerFeed(WETH, CHAINLINK_ETH_USD, 3600);
-
-        uint256 price = oracle.getPrice(WETH);
-        // ETH price should be between $100 and $100,000
-        assertGt(price, 100e8);
-        assertLt(price, 100_000e8);
+    /// @dev Fork test 1: GovToken deployed and has correct supply
+    function test_fork_govTokenDeployed() public view {
+        GovToken token = GovToken(GOVTOKEN);
+        assertEq(token.name(), "DeFi Gov Token");
+        assertEq(token.symbol(), "DGT");
+        assertGt(token.totalSupply(), 0);
+        assertEq(token.balanceOf(DEPLOYER), 100_000 ether);
     }
 
-    /// @dev Fork test 2: USDC exists and has supply > 0 on Arbitrum
-    function test_fork_usdcOnArbitrum() public {
-        vm.selectFork(arbitrumFork);
-
-        IERC20 usdc = IERC20(USDC);
-        assertGt(usdc.totalSupply(), 0);
+    /// @dev Fork test 2: Vault deployed with correct asset
+    function test_fork_vaultDeployed() public view {
+        Vault vault = Vault(VAULT);
+        assertEq(vault.asset(), GOVTOKEN);
+        assertEq(vault.name(), "Protocol Vault");
+        assertGe(vault.totalAssets(), 0);
     }
 
-    /// @dev Fork test 3: Chainlink feed staleness check works with real feed
-    function test_fork_chainlinkStalenessCheck() public {
-        vm.selectFork(arbitrumFork);
-
-        vm.prank(owner);
-        oracle = new PriceOracle(owner);
-
-        // Register with very short staleness (1 second)
-        vm.prank(owner);
-        oracle.registerFeed(WETH, CHAINLINK_ETH_USD, 1);
-
-        // Warp forward — price becomes stale
-        vm.warp(block.timestamp + 2);
-        vm.expectRevert();
-        oracle.getPrice(WETH);
+    /// @dev Fork test 3: Oracle deployed and owner is deployer
+    function test_fork_oracleDeployed() public view {
+        PriceOracle oracle = PriceOracle(ORACLE);
+        assertEq(oracle.owner(), DEPLOYER);
     }
 
-    /// @dev Fork test 4: Mock aggregator works as drop-in for real feed
-    function test_fork_mockAggregatorDropIn() public {
-        vm.selectFork(arbitrumFork);
+    /// @dev Fork test 4: Real Chainlink feed on Sepolia returns valid price
+    function test_fork_chainlinkSepoliaFeed() public {
+        PriceOracle oracle = PriceOracle(ORACLE);
 
-        MockAggregator mock = new MockAggregator(2000e8, 8);
+        address weth = makeAddr("weth");
+        vm.prank(DEPLOYER);
+        oracle.registerFeed(weth, CHAINLINK_ETH_USD_SEPOLIA, 3600);
 
-        vm.prank(owner);
-        oracle = new PriceOracle(owner);
-        vm.prank(owner);
-        oracle.registerFeed(WETH, address(mock), 3600);
-
-        uint256 price = oracle.getPrice(WETH);
-        assertEq(price, 2000e8);
+        uint256 price = oracle.getPrice(weth);
+        assertGt(price, 100e8);       // ETH > $100
+        assertLt(price, 100_000e8);   // ETH < $100,000
     }
 
-    /// @dev Fork test 5: WETH balance readable on Ethereum mainnet
-    function test_fork_mainnetWethBalance() public {
-        vm.selectFork(mainnetFork);
-        IERC20 weth = IERC20(WETH);
-        uint256 bal = weth.balanceOf(UNISWAP_V2_ROUTER);
-        assertGe(bal, 0);
+    /// @dev Fork test 5: Deposit into deployed Vault works on fork
+    function test_fork_depositIntoVault() public {
+        GovToken token = GovToken(GOVTOKEN);
+        Vault vault    = Vault(VAULT);
+
+        address user = makeAddr("forkUser");
+
+        // Give user some tokens via deployer
+        vm.prank(DEPLOYER);
+        token.transfer(user, 1000 ether);
+
+        vm.startPrank(user);
+        token.approve(address(vault), 1000 ether);
+        uint256 shares = vault.deposit(1000 ether, user);
+        vm.stopPrank();
+
+        assertGt(shares, 0);
+        assertEq(vault.balanceOf(user), shares);
     }
 }
