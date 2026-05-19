@@ -1,0 +1,214 @@
+Warning: optimizer settings and `viaIR` have been disabled for accurate coverage reports.
+If you encounter "stack too deep" errors, consider using `--ir-minimum` which enables `viaIR` with minimum optimization resolving most of the errors.
+See more: https://book.getfoundry.sh/guides/best-practices/stack-too-deep
+Compiling 125 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.50s
+Compiler run successful!
+Analysing contracts...
+Running tests...
+
+Ran 10 tests for test/unit/GameItemsTest.t.sol:GameItemsTest
+[PASS] test_burn() (gas: 108621)
+[PASS] test_burn_revert_notAuthorized() (gas: 103849)
+[PASS] test_mintBatch() (gas: 150589)
+[PASS] test_mint_gold() (gas: 98444)
+[PASS] test_mint_revert_notMinter() (gas: 17914)
+[PASS] test_mint_silver() (gas: 98401)
+[PASS] test_pause_blocksMint() (gas: 45393)
+[PASS] test_supportsInterface_ERC1155() (gas: 6571)
+[PASS] test_totalSupply_tracked() (gas: 97833)
+[PASS] test_unpause_allowsMint() (gas: 107680)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 831.00ms (42.54ms CPU time)
+
+Ran 16 tests for test/unit/AMMTest.t.sol:AMMTest
+[PASS] test_addInitialLiquidity() (gas: 255233)
+[PASS] test_addLiquidityMintCorrectLP() (gas: 254561)
+[PASS] test_addLiquiditySecondProvider() (gas: 312938)
+[PASS] test_getAmountOut() (gas: 259932)
+[PASS] test_kInvariantAfterSwap() (gas: 292969)
+[PASS] test_removeLiquidity() (gas: 280427)
+[PASS] test_revert_addLiquiditySlippage() (gas: 262916)
+[PASS] test_revert_addLiquidityZeroAmount() (gas: 18764)
+[PASS] test_revert_removeLiquiditySlippage() (gas: 287528)
+[PASS] test_revert_removeLiquidityZero() (gas: 18043)
+[PASS] test_revert_swapInvalidToken() (gas: 261283)
+[PASS] test_revert_swapSlippage() (gas: 266633)
+[PASS] test_revert_swapZeroAmount() (gas: 263438)
+[PASS] test_swapAtoB() (gas: 293521)
+[PASS] test_swapBtoA() (gas: 293568)
+[PASS] test_swapFeeApplied() (gas: 287698)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 832.33ms (116.58ms CPU time)
+
+Ran 5 tests for test/fuzz/FuzzAMM.t.sol:FuzzAMM
+[PASS] testFuzz_depositWithdrawSymmetry(uint256) (runs: 1000, μ: 106288, ~: 106486)
+[PASS] testFuzz_getAmountOutMatchesSwap(uint256) (runs: 1000, μ: 71899, ~: 72065)
+[PASS] testFuzz_kInvariantNeverDecreases(uint256) (runs: 1000, μ: 73800, ~: 73978)
+[PASS] testFuzz_lpTokensProportional(uint256) (runs: 1000, μ: 82955, ~: 83153)
+[PASS] testFuzz_swapOutputLessThanInput(uint256) (runs: 1000, μ: 68464, ~: 68642)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 832.21ms (3.87s CPU time)
+
+Ran 5 tests for test/fork/ForkTest.t.sol:ForkTest
+[PASS] test_fork_chainlinkRealFeed() (gas: 1088502)
+[PASS] test_fork_chainlinkStalenessCheck() (gas: 1089648)
+[PASS] test_fork_mainnetWethBalance() (gas: 11122)
+[PASS] test_fork_mockAggregatorDropIn() (gas: 1480156)
+[PASS] test_fork_usdcOnArbitrum() (gas: 17949)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 3.58s (7.26s CPU time)
+
+Ran 10 tests for test/unit/ProtocolManagerV2Test.t.sol:ProtocolManagerV2Test
+[PASS] test_v2_accrueFee() (gas: 37100)
+[PASS] test_v2_accrueFee_blockedWhenPaused() (gas: 43097)
+[PASS] test_v2_emergencyPause() (gas: 42510)
+[PASS] test_v2_emergencyUnpause() (gas: 32529)
+[PASS] test_v2_feeRecipient() (gas: 15097)
+[PASS] test_v2_protocolFee() (gas: 12905)
+[PASS] test_v2_setFeeRecipient_zeroAddress_reverts() (gas: 18408)
+[PASS] test_v2_setProtocolFee() (gas: 26268)
+[PASS] test_v2_setProtocolFee_tooHigh_reverts() (gas: 18386)
+[PASS] test_v2_version() (gas: 15679)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 29.03s (35.30ms CPU time)
+
+Ran 18 tests for test/unit/VaultTest.t.sol:VaultTest
+[PASS] test_assetAddress() (gas: 8155)
+[PASS] test_convertToAssets() (gas: 108953)
+[PASS] test_convertToShares() (gas: 108354)
+[PASS] test_deposit() (gas: 105392)
+[PASS] test_depositUpdatesAssets() (gas: 106029)
+[PASS] test_feeIsSet() (gas: 8028)
+[PASS] test_multipleDepositors() (gas: 157930)
+[PASS] test_nameAndSymbol() (gas: 19516)
+[PASS] test_previewDeposit() (gas: 16312)
+[PASS] test_previewRedeem() (gas: 108280)
+[PASS] test_redeem() (gas: 98380)
+[PASS] test_revert_collectFeeNotOwner() (gas: 13992)
+[PASS] test_revert_feeTooHigh() (gas: 14064)
+[PASS] test_revert_setFeeNotOwner() (gas: 14057)
+[PASS] test_revert_setFeeRecipientZero() (gas: 13997)
+[PASS] test_setFee() (gas: 20965)
+[PASS] test_setFeeRecipient() (gas: 22154)
+[PASS] test_withdraw() (gas: 130102)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 29.03s (99.70ms CPU time)
+
+Ran 18 tests for test/unit/GovTokenTest.t.sol:GovTokenTest
+[PASS] test_delegateAndVotingPower() (gas: 88671)
+[PASS] test_delegateTo() (gas: 94659)
+[PASS] test_getPastVotes() (gas: 90691)
+[PASS] test_initialSupply() (gas: 13999)
+[PASS] test_maxSupply() (gas: 5840)
+[PASS] test_mint() (gas: 63537)
+[PASS] test_name() (gas: 13398)
+[PASS] test_ownerIsSet() (gas: 10245)
+[PASS] test_permit() (gas: 112886)
+[PASS] test_revert_expiredPermit() (gas: 15424)
+[PASS] test_revert_mintExceedsMaxSupply() (gas: 19108)
+[PASS] test_revert_mintNotOwner() (gas: 14472)
+[PASS] test_revert_transferOwnershipNotOwner() (gas: 16163)
+[PASS] test_symbol() (gas: 13396)
+[PASS] test_transfer() (gas: 52535)
+[PASS] test_transferFrom() (gas: 61237)
+[PASS] test_transferOwnership() (gas: 21858)
+[PASS] test_votingPowerAfterTransfer() (gas: 128301)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 29.03s (75.20ms CPU time)
+
+Ran 3 tests for test/invariant/InvariantAMM.t.sol:InvariantAMM
+[PASS] invariant_kNeverDecreases() (runs: 500, calls: 50000, reverts: 0)
+
+╭------------+-----------------+-------+---------+----------╮
+| Contract   | Selector        | Calls | Reverts | Discards |
++===========================================================+
+| AMMHandler | addLiquidity    | 16504 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | removeLiquidity | 16677 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | swap            | 16819 | 0       | 0        |
+╰------------+-----------------+-------+---------+----------╯
+
+[PASS] invariant_lpSupplyConsistent() (runs: 500, calls: 50000, reverts: 0)
+
+╭------------+-----------------+-------+---------+----------╮
+| Contract   | Selector        | Calls | Reverts | Discards |
++===========================================================+
+| AMMHandler | addLiquidity    | 16504 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | removeLiquidity | 16677 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | swap            | 16819 | 0       | 0        |
+╰------------+-----------------+-------+---------+----------╯
+
+[PASS] invariant_reservesMatchBalances() (runs: 500, calls: 50000, reverts: 0)
+
+╭------------+-----------------+-------+---------+----------╮
+| Contract   | Selector        | Calls | Reverts | Discards |
++===========================================================+
+| AMMHandler | addLiquidity    | 16504 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | removeLiquidity | 16677 | 0       | 0        |
+|------------+-----------------+-------+---------+----------|
+| AMMHandler | swap            | 16819 | 0       | 0        |
+╰------------+-----------------+-------+---------+----------╯
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 29.03s (84.49s CPU time)
+
+Ran 11 tests for test/unit/OracleTest.t.sol:OracleTest
+[PASS] test_deactivateFeed() (gas: 23735)
+[PASS] test_getPrice() (gas: 26594)
+[PASS] test_getPriceSafe() (gas: 26941)
+[PASS] test_getPriceSafeReturnsFalseWhenStale() (gas: 30238)
+[PASS] test_getRegisteredTokens() (gas: 13937)
+[PASS] test_priceUpdates() (gas: 36457)
+[PASS] test_registerMultipleFeeds() (gas: 526645)
+[PASS] test_revert_feedNotFound() (gas: 18101)
+[PASS] test_revert_invalidPrice() (gas: 38843)
+[PASS] test_revert_registerFeedNotOwner() (gas: 18865)
+[PASS] test_revert_stalePrice() (gas: 30502)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 29.03s (40.24ms CPU time)
+
+Ran 5 tests for test/fuzz/FuzzVault.t.sol:FuzzVault
+[PASS] testFuzz_conversionInverse(uint256) (runs: 1000, μ: 115304, ~: 115524)
+[PASS] testFuzz_depositAlwaysGivesShares(uint256) (runs: 1000, μ: 104265, ~: 103732)
+[PASS] testFuzz_depositRedeemRoundtrip(uint256) (runs: 1000, μ: 98574, ~: 98752)
+[PASS] testFuzz_maxDepositUnbounded(uint256) (runs: 1000, μ: 9603, ~: 9007)
+[PASS] testFuzz_totalAssetsAccounting(uint256) (runs: 1000, μ: 107584, ~: 107821)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 29.03s (31.97s CPU time)
+
+Ran 10 test suites in 29.04s (180.27s CPU time): 101 tests passed, 0 failed, 0 skipped (101 total tests)
+
+╭-----------------------------------+------------------+------------------+----------------+----------------╮
+| File                              | % Lines          | % Statements     | % Branches     | % Funcs        |
++===========================================================================================================+
+| script/Deploy.s.sol               | 0.00% (0/36)     | 0.00% (0/51)     | 100.00% (0/0)  | 0.00% (0/1)    |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/AMM.sol                  | 97.50% (78/80)   | 93.69% (104/111) | 76.00% (19/25) | 100.00% (7/7)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/AMMFactory.sol           | 0.00% (0/30)     | 0.00% (0/43)     | 0.00% (0/8)    | 0.00% (0/4)    |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/MathLib.sol              | 0.00% (0/31)     | 0.00% (0/33)     | 0.00% (0/6)    | 0.00% (0/8)    |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/ProtocolManager.sol      | 0.00% (0/30)     | 0.00% (0/24)     | 0.00% (0/4)    | 0.00% (0/10)   |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/ProtocolManagerV2.sol    | 49.02% (25/51)   | 44.19% (19/43)   | 33.33% (3/9)   | 50.00% (8/16)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/core/Vault.sol                | 85.19% (23/27)   | 75.00% (18/24)   | 33.33% (2/6)   | 100.00% (9/9)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/governance/DeFiGovernor.sol   | 0.00% (0/20)     | 0.00% (0/20)     | 100.00% (0/0)  | 0.00% (0/10)   |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/governance/GovToken.sol       | 100.00% (9/9)    | 100.00% (6/6)    | 100.00% (2/2)  | 100.00% (4/4)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/oracle/MockAggregator.sol     | 52.38% (11/21)   | 61.54% (8/13)    | 100.00% (0/0)  | 37.50% (3/8)   |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/oracle/PriceOracle.sol        | 92.86% (26/28)   | 87.88% (29/33)   | 60.00% (6/10)  | 100.00% (5/5)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| src/tokens/GameItems.sol          | 100.00% (21/21)  | 100.00% (14/14)  | 100.00% (2/2)  | 100.00% (8/8)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| test/fuzz/FuzzAMM.t.sol           | 100.00% (2/2)    | 100.00% (1/1)    | 100.00% (0/0)  | 100.00% (1/1)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| test/fuzz/FuzzVault.t.sol         | 100.00% (2/2)    | 100.00% (1/1)    | 100.00% (0/0)  | 100.00% (1/1)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| test/invariant/InvariantAMM.t.sol | 100.00% (29/29)  | 100.00% (32/32)  | 100.00% (5/5)  | 100.00% (5/5)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| test/unit/AMMTest.t.sol           | 100.00% (2/2)    | 100.00% (1/1)    | 100.00% (0/0)  | 100.00% (1/1)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| test/unit/VaultTest.t.sol         | 100.00% (2/2)    | 100.00% (1/1)    | 100.00% (0/0)  | 100.00% (1/1)  |
+|-----------------------------------+------------------+------------------+----------------+----------------|
+| Total                             | 54.63% (230/421) | 51.88% (234/451) | 50.65% (39/77) | 53.54% (53/99) |
+╰-----------------------------------+------------------+------------------+----------------+----------------╯
